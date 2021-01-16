@@ -67,6 +67,7 @@ function collectPosts(data, config) {
 				},
 				frontmatter: {
 					title: getPostTitle(post),
+					description: getDescription(post),
 					date: getPostDate(post),
 					categories: getCategories(post),
 					tags: getTags(post)
@@ -128,6 +129,17 @@ function getCategories(post) {
 
 function getTags(post) {
 	return processCategoryTags(post, 'post_tag');
+}
+
+function getDescription(post) {
+	// console.log(post.postmeta);
+	if (post.postmeta === undefined) {
+		return undefined;
+	}
+
+	const postmeta = post.postmeta.find(postmeta => postmeta.meta_key[0] === 'the_page_meta_description');
+	const description = postmeta ? postmeta.meta_value[0] : undefined;
+	return description;
 }
 
 function processCategoryTags(post, domain) {
@@ -199,5 +211,6 @@ function mergeImagesIntoPosts(images, posts) {
 		});
 	});
 }
+
 
 exports.parseFilePromise = parseFilePromise;
