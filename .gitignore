@@ -6,3 +6,6 @@ tmp/
 #ignore specific filenames
 export.xml
 .DS_Store
+
+# ignore log
+logs/
