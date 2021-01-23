@@ -1,5 +1,7 @@
 const turndown = require('turndown');
 const turndownPluginGfm = require('turndown-plugin-gfm');
+const { searchFile } = require('./searchFile')
+const SEARCH_DIRECTORY = '/home/tombo/workspace/tombomemo_wordpress/wp-content/uploads';
 
 function initTurndownService() {
   const turndownService = new turndown({
@@ -12,7 +14,12 @@ function initTurndownService() {
 
   // remove anchor link from image
   turndownService.addRule('removeAnchor', {
-    filter: node => { return (node.getAttribute('class') === 'wp-block-image') },
+    filter: node => {
+      return (
+        node.getAttribute('class') === 'wp-block-image' ||
+        node.getAttribute('class') === 'blocks-gallery-item'
+      )
+    },
     replacement: (content, node, options) => {
 
       // extract raw image src
@@ -40,8 +47,23 @@ function initTurndownService() {
         return !(value.match(/.*?(-\d+x\d+).*(jpg|png|jpeg|gif)$/g))
       })
 
+      // get raw image path from local files
+      // anchor linkやimgにraw画像のパスを見つけられなかった場合、
+      // ftpでWordPressと同期しているローカルファイルを探索して、
+      // raw画像を探し出す
+      // let rawFileUrl = '';
+      if (rawImagesSrcList.length === 0) {
+        // console.log(imageSrcList);
+        const rawFileName = imageSrcList[0].match(/.*\/(.*)?(-\d+x\d+).*(jpg|png|jpeg|gif)$/)[1]
+        const searchRawRegex = new RegExp(`${rawFileName}.(jpg|png|jpeg|gif)$`)
+        const rawFileList = searchFile(SEARCH_DIRECTORY, searchRawRegex)
+        rawFileList[0] && rawImagesSrcList.push(rawFileList[0].replace('/home/tombo/workspace/tombomemo_wordpress', 'https://tombomemo.com'))
+        // console.log(rawFileUrl);
+        console.log(rawImagesSrcList);
+      }
+
       // set image src for markdown
-      const markdownImageSrc = rawImagesSrcList[0] || imageSrcList[0] || ''
+      const imageSrc = rawImagesSrcList[0] || imageSrcList[0] || ''
 
       // extract alt string
       let altStringList = []
@@ -54,9 +76,9 @@ function initTurndownService() {
       for (let i = 0; i < figcaptions.length; i++) {
         figcaptions[i].textContent && altStringList.push(figcaptions[i].textContent.trim())
       }
-      const markdownAlt = altStringList[0] || '';
+      const imageAlt = altStringList[0] || '';
 
-      return `![${markdownAlt}](${markdownImageSrc})`
+      return `![${imageAlt}](${imageSrc})`
     }
   });
 
