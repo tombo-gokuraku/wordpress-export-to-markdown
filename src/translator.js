@@ -53,13 +53,10 @@ function initTurndownService() {
       // raw画像を探し出す
       // let rawFileUrl = '';
       if (rawImagesSrcList.length === 0) {
-        // console.log(imageSrcList);
         const rawFileName = imageSrcList[0].match(/.*\/(.*)?(-\d+x\d+).*(jpg|png|jpeg|gif)$/)[1]
         const searchRawRegex = new RegExp(`${rawFileName}.(jpg|png|jpeg|gif)$`)
         const rawFileList = searchFile(SEARCH_DIRECTORY, searchRawRegex)
         rawFileList[0] && rawImagesSrcList.push(rawFileList[0].replace('/home/tombo/workspace/tombomemo_wordpress', 'https://tombomemo.com'))
-        // console.log(rawFileUrl);
-        console.log(rawImagesSrcList);
       }
 
       // set image src for markdown
@@ -138,6 +135,8 @@ function getPostContent(post, turndownService, config) {
 
   if (config.saveScrapedImages) {
     // writeImageFile() will save all content images to a relative /images
+    //convert raw image path
+    content = content.replace(/(<img[^>]*src=").*?([^/"]+)(-\d+x\d+)\.(gif|jpe?g|png)("[^>]*>)/gi, '$1/assets/$2.$4$5');
     // folder so update references in post content to match
     content = content.replace(/(<img[^>]*src=").*?([^/"]+\.(?:gif|jpe?g|png))("[^>]*>)/gi, '$1/assets/$2$3');
   }
