@@ -16,8 +16,10 @@ function initTurndownService() {
   turndownService.addRule('removeAnchor', {
     filter: node => {
       return (
-        node.getAttribute('class') === 'wp-block-image' ||
-        node.getAttribute('class') === 'blocks-gallery-item'
+        node.getAttribute('class') && (
+          node.getAttribute('class').includes('wp-block-image') ||
+          node.getAttribute('class').includes('blocks-gallery-item')
+        )
       )
     },
     replacement: (content, node, options) => {
